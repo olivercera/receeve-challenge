@@ -1,0 +1,51 @@
+service: receeve-challenge
+frameworkVersion: '3'
+
+plugins:
+  - serverless-plugin-typescript
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:PutObject"
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - "Ref" : "MailgunEventsBucket"
+                - "/*"
+        - Effect: "Allow"
+          Action:
+            - "sns:Publish"
+          Resource:
+            - !Ref SNSTopic
+
+functions:
+  mailgun-webhook:
+    handler: src/index.webhook
+    events:
+      - httpApi:
+          method: POST
+          path: /mailgun/webhook
+    environment:
+      REGION: ${aws:region}
+      EVENTS_BUCKET: !Ref MailgunEventsBucket
+      SNS_TOPIC: !Ref SNSTopic
+      MAILGUN_API_KEY: ${ssm:/receeve-olivercera-mailgunApiKey}
+
+resources:
+  Resources:
+    MailgunEventsBucket:
+      Type: AWS::S3::Bucket
+    SNSTopic:
+      Type: AWS::SNS::Topic
+  Outputs:
+    SNSTopicName:
+      Description: "SNS Created"
+      Value: !Ref SNSTopic
