@@ -27,6 +27,9 @@ Once it is deployed you will have an url, to setup your mailgun webhook
 
 it would be something like https://abc123.execute-api.us-region.amazonaws.com/mailgun/webhook
 
+# CI / CD
+
+I also implemented a basic CI / CD for this, using AWS Codepipeline using standard config and the steps above you would find them on buildspec.yml
 
 ## Taking implementation to next level
 
